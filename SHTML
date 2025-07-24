@@ -1,0 +1,59 @@
+<DOBLE!> html
+   <canvas id="scratchCanvas" width="500" height="300"></canvas>
+//JavaScript
+   const canvas = document.getElementById('scratchCanvas');
+   const ctx = canvas.getContext('2d');
+
+   // Desenhe o fundo
+   const backgroundImage = new Image();
+   backgroundImage.src = 'caminho/para/sua/imagem.jpg';
+   backgroundImage.onload = () => {
+       ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+   };
+
+   // Desenhe o overlay
+   ctx.fillStyle = 'gray'; // Cor do overlay
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+   canvas.addEventListener('mousedown', startDrawing);
+   canvas.addEventListener('mouseup', stopDrawing);
+   canvas.addEventListener('mouseout', stopDrawing);
+   canvas.addEventListener('mousemove', draw);
+   canvas.addEventListener('touchstart', startDrawing);
+   canvas.addEventListener('touchend', stopDrawing);
+   canvas.addEventListener('touchcancel', stopDrawing);
+   canvas.addEventListener('touchmove', draw);
+
+   let isDrawing = false;
+
+   function startDrawing(e) {
+       isDrawing = true;
+       draw(e);
+   }
+
+   function stopDrawing() {
+       isDrawing = false;
+       ctx.beginPath(); // Reinicia o caminho para o próximo traço
+   }
+
+   function draw(e) {
+       if (!isDrawing) return;
+
+       // Ajuste as coordenadas para lidar com diferentes tamanhos de tela e tipos de entrada
+       let x, y;
+       if (e.type.startsWith('touch')) {
+           const rect = canvas.getBoundingClientRect();
+           x = e.touches[0].clientX - rect.left;
+           y = e.touches[0].clientY - rect.top;
+       } else {
+           x = e.offsetX;
+           y = e.offsetY;
+       }
+
+       ctx.globalCompositeOperation = 'destination-out'; // Remove o pixel
+       ctx.lineWidth = 20; // Tamanho do "raspar"
+       ctx.lineCap = 'round'; // Formato da ponta da linha
+       ctx.lineTo(x, y);
+       ctx.stroke();
+       ctx.beginPath();
+       ctx.moveTo(x, y);
+   }
